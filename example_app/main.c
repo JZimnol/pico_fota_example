@@ -153,17 +153,6 @@ static int connect_to_server(void) {
 }
 
 /**
- * Main application task.
- */
-static void main_app_task(__unused void *params) {
-    while (1) {
-        LOG(main_app, INF,
-            "This is the main app, I dunno, blink LED or something");
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
-    }
-}
-
-/**
  * Connects to the TCP server and downloads the binary file.
  */
 static int download_file(size_t *out_binary_size) {
@@ -234,6 +223,17 @@ static void download_task(__unused void *params) {
         binary_size);
     pfb_mark_download_slot_as_valid();
     pfb_perform_update();
+}
+
+/**
+ * Main application task.
+ */
+static void main_app_task(__unused void *params) {
+    while (1) {
+        LOG(main_app, INF,
+            "This is the main app, I dunno, blink LED or something");
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+    }
 }
 
 int main(void) {
