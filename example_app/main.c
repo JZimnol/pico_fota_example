@@ -166,7 +166,7 @@ static void main_app_task(__unused void *params) {
 /**
  * Connects to the TCP server and downloads the binary file.
  */
-static int download_file(int *out_sockfd, size_t *out_binary_size) {
+static int download_file(size_t *out_binary_size) {
     int len_bytes;
     uint8_t buf[MAX_RECV_DATA_SIZE];
     int sockfd;
@@ -183,31 +183,33 @@ static int download_file(int *out_sockfd, size_t *out_binary_size) {
     while (1) {
         if ((len_bytes = recv(sockfd, buf, MAX_RECV_DATA_SIZE, 0)) == -1) {
             LOG(download, ERR, "recv() failed");
-            return ret;
+            break;
         }
         if (len_bytes == 0) {
             LOG(download, INF, "Connection closed");
-            ret = (flash_offset <= 0);
-            *out_sockfd = sockfd;
+            ret = (flash_offset == 0);
             *out_binary_size = flash_offset;
-            return ret;
+            break;
         }
         if (pfb_write_to_flash_aligned_256_bytes(buf, flash_offset,
                                                  len_bytes)) {
             LOG(download, ERR, "pfb_write_to_flash_aligned_256_bytes() failed");
-            return ret;
+            break;
         }
         flash_offset += len_bytes;
         if (send(sockfd, READY_FOR_NEXT_CHUNK_MESSAGE,
                  strlen(READY_FOR_NEXT_CHUNK_MESSAGE), 0)
             == -1) {
             LOG(download, ERR, "send() failed");
-            return ret;
+            break;
         }
         if (++counter % 10 == 0) {
             LOG(download, INF, "Downloaded %zu bytes", flash_offset);
         }
     }
+
+    close(sockfd);
+    return ret;
 }
 
 /**
@@ -223,13 +225,11 @@ static void download_task(__unused void *params) {
         LOG(download, INF, "#### RUNNING ON A NEW FIRMWARE ####");
     }
 
-    int sockfd;
     size_t binary_size;
-    while (download_file(&sockfd, &binary_size)) {
+    while (download_file(&binary_size)) {
         LOG(download, ERR, "Failed to download firmware");
     }
 
-    close(sockfd);
     LOG(download, INF, "Performing update, firmware size: %zu bytes",
         binary_size);
     pfb_mark_download_slot_as_valid();
