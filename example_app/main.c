@@ -164,6 +164,53 @@ static void main_app_task(__unused void *params) {
 }
 
 /**
+ * Connects to the TCP server and downloads the binary file.
+ */
+static int download_file(int *out_sockfd, size_t *out_binary_size) {
+    int len_bytes;
+    uint8_t buf[MAX_RECV_DATA_SIZE];
+    int sockfd;
+    size_t flash_offset = 0;
+    int ret = 1;
+
+    pfb_initialize_download_slot();
+    while ((sockfd = connect_to_server()) == -1) {
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        LOG(download, INF, "Retrying connecting to the TCP server");
+    }
+
+    int counter = 0;
+    while (1) {
+        if ((len_bytes = recv(sockfd, buf, MAX_RECV_DATA_SIZE, 0)) == -1) {
+            LOG(download, ERR, "recv() failed");
+            return ret;
+        }
+        if (len_bytes == 0) {
+            LOG(download, INF, "Connection closed");
+            ret = (flash_offset <= 0);
+            *out_sockfd = sockfd;
+            *out_binary_size = flash_offset;
+            return ret;
+        }
+        if (pfb_write_to_flash_aligned_256_bytes(buf, flash_offset,
+                                                 len_bytes)) {
+            LOG(download, ERR, "pfb_write_to_flash_aligned_256_bytes() failed");
+            return ret;
+        }
+        flash_offset += len_bytes;
+        if (send(sockfd, READY_FOR_NEXT_CHUNK_MESSAGE,
+                 strlen(READY_FOR_NEXT_CHUNK_MESSAGE), 0)
+            == -1) {
+            LOG(download, ERR, "send() failed");
+            return ret;
+        }
+        if (++counter % 10 == 0) {
+            LOG(download, INF, "Downloaded %zu bytes", flash_offset);
+        }
+    }
+}
+
+/**
  * Firmware update task. Connects to the TCP server and waits for firmware
  * chunks. This task serves development purposes only and should be improved for
  * real-world applications.
@@ -176,58 +223,15 @@ static void download_task(__unused void *params) {
         LOG(download, INF, "#### RUNNING ON A NEW FIRMWARE ####");
     }
 
-    bool is_err;
-    int len_bytes;
-    uint8_t buf[MAX_RECV_DATA_SIZE];
-    size_t flash_offset;
     int sockfd;
-
-connection_start:
-    pfb_initialize_download_slot();
-    flash_offset = 0;
-    is_err = true;
-    while ((sockfd = connect_to_server()) == -1) {
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
-        LOG(download, INF, "Retrying connecting to the TCP server");
-    }
-
-    int counter = 0;
-    while (1) {
-        if ((len_bytes = recv(sockfd, buf, MAX_RECV_DATA_SIZE, 0)) == -1) {
-            LOG(download, ERR, "recv() failed");
-            goto end_connection;
-        }
-        if (len_bytes == 0) {
-            LOG(download, INF, "Connection closed");
-            is_err = flash_offset > 0 ? false : true;
-            goto end_connection;
-        }
-        if (pfb_write_to_flash_aligned_256_bytes(buf, flash_offset,
-                                                 len_bytes)) {
-            LOG(download, ERR, "pfb_write_to_flash_aligned_256_bytes() failed");
-            goto end_connection;
-        }
-        flash_offset += len_bytes;
-        if (send(sockfd, READY_FOR_NEXT_CHUNK_MESSAGE,
-                 strlen(READY_FOR_NEXT_CHUNK_MESSAGE), 0)
-            == -1) {
-            LOG(download, ERR, "send() failed");
-            goto end_connection;
-        }
-        if (++counter % 10 == 0) {
-            LOG(download, INF, "Downloaded %zu bytes", flash_offset);
-        }
-    }
-
-end_connection:
-    close(sockfd);
-    if (is_err) {
+    size_t binary_size;
+    while (download_file(&sockfd, &binary_size)) {
         LOG(download, ERR, "Failed to download firmware");
-        goto connection_start;
     }
 
+    close(sockfd);
     LOG(download, INF, "Performing update, firmware size: %zu bytes",
-        flash_offset);
+        binary_size);
     pfb_mark_download_slot_as_valid();
     pfb_perform_update();
 }
