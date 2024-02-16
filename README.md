@@ -18,6 +18,9 @@ file accordingly.
 
 - [Pico W HTTP client](https://github.com/jondurrant/RPIPicoW-OTA-Exp) created
   by [Jon Durrant](https://github.com/jondurrant)
+- [Firmware Update LwM2M Object](https://github.com/AVSystem/Anjay-pico-client/tree/master/firmware_update)
+  of
+  [Anjay-pico-client](https://github.com/AVSystem/Anjay-pico-client/tree/master)
 
 ## Respository contents
 
