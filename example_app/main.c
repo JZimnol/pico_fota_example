@@ -56,7 +56,7 @@
 /**
  * Max number of bytes we can receive at once.
  */
-#define MAX_RECV_DATA_SIZE 1024
+#define MAX_RECV_DATA_SIZE (4 * PFB_ALIGN_SIZE)
 /**
  * Message sent to server that indicates that we are ready to receive next chunk
  * of data.
@@ -210,8 +210,13 @@ static void download_task(__unused void *params) {
     LOG(download, INF, "This is the download task");
     wifi_init();
 
+    pfb_firmware_commit();
+
     if (pfb_is_after_firmware_update()) {
         LOG(download, INF, "#### RUNNING ON A NEW FIRMWARE ####");
+    }
+    if (pfb_is_after_rollback()) {
+        LOG(download, WRN, "#### ROLLBACK PERFORMED ####");
     }
 
     size_t binary_size;

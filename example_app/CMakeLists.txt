@@ -39,8 +39,8 @@ target_link_libraries(example_app PUBLIC
                       pico_stdlib
                       FreeRTOS
                       pico_fota_bootloader_lib)
-target_link_options(example_app PRIVATE "-L${CMAKE_SOURCE_DIR}/pico_fota_bootloader/linker_common")
-pico_set_linker_script(example_app ${CMAKE_SOURCE_DIR}/pico_fota_bootloader/linker_common/application.ld)
+
+pfb_compile_with_bootloader(example_app)
 
 target_compile_definitions(example_app PRIVATE
                            WIFI_SSID=\"${WIFI_SSID}\"
