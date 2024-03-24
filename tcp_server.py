@@ -28,7 +28,7 @@ MAX_RECV_DATA_SIZE = 100
 BINARY_CHUNK_SIZE = 1024
 
 DEFAULT_PORT = 3490
-DEFAULT_BINARY_PATH = './build/example_app/example_app.bin'
+DEFAULT_BINARY_PATH = './build/example_app/example_app_fota_image.bin'
 
 
 def _main():

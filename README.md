@@ -22,7 +22,7 @@ file accordingly.
   of
   [Anjay-pico-client](https://github.com/AVSystem/Anjay-pico-client/tree/master)
 
-## Respository contents
+## Repository contents
 
 The repository consists of:
 - `tcp_server.py` - a simple Python script that creates a TCP server and sends
@@ -64,6 +64,7 @@ build/
 │   ├── example_app.dis
 │   ├── example_app.elf
 │   ├── example_app.elf.map
+│   ├── example_app_fota_image.bin
 │   ├── example_app.hex
 │   ├── example_app.uf2
 │   └── Makefile
@@ -117,9 +118,9 @@ INF [main_app] This is the main app, I dunno, blink LED or something
 
 The connection to the host machine will fail because the TCP server is not set
 up yet. Now, for example, change one of the log messages in the
-`example_app/main.c` file and recompile the application. You will create a "new"
-`example_app.bin` that will be sent to Raspberry Pi Pico W after running the
-TCP server.
+`example_app/main.c` file and recompile the application. You will create a
+"new" `example_app_fota_image.bin` that will be sent to Raspberry Pi Pico W
+after running the TCP server.
 
 ## Running the TCP server and performing the Firmware Update Over The Air
 
@@ -131,7 +132,7 @@ python3 tcp_server.py --binary-file <path> --port <port>
 ```
 where:
 - `--binary-file <path>` - path to the binary file that will be sent to
-  Raspberry Pi Pico W (optional, default: `./build/example_app/example_app.bin`)
+  Raspberry Pi Pico W (optional, default: `./build/example_app/example_app_fota_image.bin`)
 - `--port <port>` - port of the server (optional, default: `3490`)
 
 In the simplest case, just run:
@@ -143,7 +144,7 @@ python3 tcp_server.py
 The following prompt will appear:
 
 ```
-Using binary path: ./build/example_app/example_app.bin
+Using binary path: ./build/example_app/example_app_fota_image.bin
 Using port: 3490
 Waiting for connections...
 ```
@@ -176,6 +177,7 @@ INF [download] Downloaded 20480 bytes
 ...
 INF [download] Downloaded 348160 bytes
 INF [download] Connection closed
+INF [download] SHA256 matches
 INF [download] Performing update, firmware size: 351488 bytes
 
 ***********************************************************

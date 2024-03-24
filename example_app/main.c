@@ -213,9 +213,11 @@ static void download_task(__unused void *params) {
     pfb_firmware_commit();
 
     if (pfb_is_after_firmware_update()) {
+        // handle this info here if needed
         LOG(download, INF, "#### RUNNING ON A NEW FIRMWARE ####");
     }
     if (pfb_is_after_rollback()) {
+        // handle this info here if needed
         LOG(download, WRN, "#### ROLLBACK PERFORMED ####");
     }
 
@@ -223,6 +225,19 @@ static void download_task(__unused void *params) {
     while (download_file(&binary_size)) {
         LOG(download, ERR, "Failed to download firmware");
     }
+
+    LOG(download, INF, "Downloaded firmware");
+
+    int ret_sha256 = pfb_firmware_sha256_check(binary_size);
+    if (ret_sha256 != 0) {
+        // handle the error here
+        while (1) {
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            LOG(download, ERR, "SHA256 %s",
+                ret_sha256 < 0 ? "mbedtls error" : "mismatch");
+        }
+    }
+    LOG(download, INF, "SHA256 matches");
 
     LOG(download, INF, "Performing update, firmware size: %zu bytes",
         binary_size);
