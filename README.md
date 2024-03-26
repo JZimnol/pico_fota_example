@@ -2,8 +2,8 @@
 
 This repository showcases an example usage of
 [pico_fota_bootloader](https://github.com/JZimnol/pico_fota_bootloader.git) - a
-bootloader that enables Firmware Over-The-Air (FOTA) updates on Raspberry Pi
-Pico W.
+bootloader that enables secure `Firmware Over-The-Air (FOTA)` OTA updates on
+Raspberry Pi Pico W.
 
 **NOTE:** This repository contains the most basic versions of the TCP client
 and TCP server which should be improved to create a more safe application.
@@ -41,7 +41,7 @@ To compile the application, run the following commands:
 # these commands may vary depending on the OS
 mkdir build/
 cd build
-cmake -DWIFI_SSID='<ssid>' -DWIFI_PASSWORD='<password>' -DHOST_ADDRESS='<address>' -DHOST_PORT='<port>' ..
+cmake -DWIFI_SSID='<ssid>' -DWIFI_PASSWORD='<password>' -DHOST_ADDRESS='<address>' -DHOST_PORT='<port>' -DPFB_AES_KEY="<your_key_value>" ..
 make -j
 ```
 
@@ -52,6 +52,9 @@ where:
   connect to to download the binary file
 - `<port>` - port of the host (your PC) Raspberry Pi Pico W should connect to to
   download the binary file
+
+(for more information about compilation options, see [pico_fota_bootloader
+README](https://github.com/JZimnol/pico_fota_bootloader/blob/master/README.md))
 
 You should have output similar to:
 
@@ -65,6 +68,7 @@ build/
 │   ├── example_app.elf
 │   ├── example_app.elf.map
 │   ├── example_app_fota_image.bin
+│   ├── example_app_fota_image_encrypted.bin
 │   ├── example_app.hex
 │   ├── example_app.uf2
 │   └── Makefile
@@ -119,7 +123,8 @@ INF [main_app] This is the main app, I dunno, blink LED or something
 The connection to the host machine will fail because the TCP server is not set
 up yet. Now, for example, change one of the log messages in the
 `example_app/main.c` file and recompile the application. You will create a
-"new" `example_app_fota_image.bin` that will be sent to Raspberry Pi Pico W
+"new" `example_app_fota_image_encrypted.bin` (or `example_app_fota_image.bin`
+if compiled without image encryption) that will be sent to Raspberry Pi Pico W
 after running the TCP server.
 
 ## Running the TCP server and performing the Firmware Update Over The Air
@@ -132,7 +137,8 @@ python3 tcp_server.py --binary-file <path> --port <port>
 ```
 where:
 - `--binary-file <path>` - path to the binary file that will be sent to
-  Raspberry Pi Pico W (optional, default: `./build/example_app/example_app_fota_image.bin`)
+  Raspberry Pi Pico W (optional, default:
+  `./build/example_app/example_app_fota_image_encrypted.bin`)
 - `--port <port>` - port of the server (optional, default: `3490`)
 
 In the simplest case, just run:
@@ -144,7 +150,7 @@ python3 tcp_server.py
 The following prompt will appear:
 
 ```
-Using binary path: ./build/example_app/example_app_fota_image.bin
+Using binary path: ./build/example_app/example_app_fota_image_encrypted.bin
 Using port: 3490
 Waiting for connections...
 ```
@@ -165,7 +171,7 @@ Sending 1024 bytes to (<pico_address>): sent = 2048 bytes
 ...
 Sending 1024 bytes to (<pico_address>): sent = 351232 bytes
 Sending 256 bytes to (<pico_address>): sent = 351488 bytes
-Closing ./build/example_app/example_app.bin
+Closing ./build/example_app/example_app_fota_image_encrypted.bin
 ```
 
 And in the Raspberry Pi Pico W serial output:
