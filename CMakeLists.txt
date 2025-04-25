@@ -47,5 +47,5 @@ target_link_libraries(FreeRTOS
                       pico_cyw43_arch_lwip_sys_freertos
                       FreeRTOS-Kernel-Heap4)
 
-add_subdirectory(pico_fota_bootloader)
+add_subdirectory(deps/pico_fota_bootloader)
 add_subdirectory(example_app)

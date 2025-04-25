@@ -60,30 +60,31 @@ You should have output similar to:
 
 ```
 build/
-├── example_app
-│   ├── CMakeFiles
-│   ├── cmake_install.cmake
-│   ├── example_app.bin
-│   ├── example_app.dis
-│   ├── example_app.elf
-│   ├── example_app.elf.map
-│   ├── example_app_fota_image.bin
-│   ├── example_app_fota_image_encrypted.bin
-│   ├── example_app.hex
-│   ├── example_app.uf2
-│   └── Makefile
-└── pico_fota_bootloader
+├── deps/
+|   └── pico_fota_bootloader/
+|       ├── CMakeFiles
+|       ├── cmake_install.cmake
+|       ├── elf2uf2
+|       ├── libpico_fota_bootloader_lib.a
+|       ├── Makefile
+|       ├── pico_fota_bootloader.bin
+|       ├── pico_fota_bootloader.dis
+|       ├── pico_fota_bootloader.elf
+|       ├── pico_fota_bootloader.elf.map
+|       ├── pico_fota_bootloader.hex
+|       └── pico_fota_bootloader.uf2
+└── example_app/
     ├── CMakeFiles
     ├── cmake_install.cmake
-    ├── elf2uf2
-    ├── libpico_fota_bootloader_lib.a
-    ├── Makefile
-    ├── pico_fota_bootloader.bin
-    ├── pico_fota_bootloader.dis
-    ├── pico_fota_bootloader.elf
-    ├── pico_fota_bootloader.elf.map
-    ├── pico_fota_bootloader.hex
-    └── pico_fota_bootloader.uf2
+    ├── example_app.bin
+    ├── example_app.dis
+    ├── example_app.elf
+    ├── example_app.elf.map
+    ├── example_app_fota_image.bin
+    ├── example_app_fota_image_encrypted.bin
+    ├── example_app.hex
+    ├── example_app.uf2
+    └── Makefile
 ```
 
 ### Running the application
@@ -92,8 +93,11 @@ Set Pico W to the BOOTSEL state (by powering it up with the `BOOTSEL` button
 pressed) and copy the `pico_fota_bootloader.uf2` file into it. Right now the
 Pico W is flashed with the bootloader but does not have proper application in
 the application FLASH memory slot. Then, set Pico W to the `BOOTSEL` state
-again and copy the `example_app.uf2` file. The board should reboot and start
-`example_app` application.
+again (if it is not already in that state) and copy the `example_app.uf2` file.
+The board should reboot and start `example_app` application.
+
+**NOTE:** you can also flash the board with `PicoProbe` using files
+`pico_fota_bootloader.elf` and `example_app.elf`.
 
 Open the serial console. The output should be similar to:
 

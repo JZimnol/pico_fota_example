@@ -4,7 +4,6 @@ AlignEscapedNewlinesLeft: true
 AlignOperands: true
 AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakTemplateDeclarations: true
-AvoidMisleadingControlStatementContinuationIndent: true
 BinPackParameters: false
 BinPackArguments: true
 BreakBeforeBinaryOperators: NonAssignment
@@ -15,6 +14,5 @@ Cpp11BracedListStyle: false
 IndentWidth: 4
 PenaltyBreakBeforeFirstCallParameter: 40
 SpaceAfterCStyleCast: true
-BreakDesignatedInitializers: true
 IndentPPDirectives: AfterHash
 ExperimentalAutoDetectBinPacking: true

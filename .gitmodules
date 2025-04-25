@@ -1,3 +1,3 @@
-[submodule "pico_fota_bootloader"]
-	path = pico_fota_bootloader
-	url = https://github.com/JZimnol/pico_fota_bootloader.git
+[submodule "deps/pico_fota_bootloader"]
+	path = deps/pico_fota_bootloader
+	url = https://github.com/JZimnol/pico_fota_bootloader

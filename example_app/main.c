@@ -20,20 +20,20 @@
  * SOFTWARE.
  */
 
-#include "hardware/gpio.h"
-#include "pico/cyw43_arch.h"
-#include "pico/stdlib.h"
+#include <hardware/gpio.h>
+#include <pico/cyw43_arch.h>
+#include <pico/stdlib.h>
 
-#include "FreeRTOS.h"
-#include "semphr.h"
-#include "task.h"
+#include <FreeRTOS.h>
+#include <semphr.h>
+#include <task.h>
 
-#include "lwip/inet.h"
-#include "lwip/netdb.h"
-#include "lwip/sockets.h"
-#include "lwipopts.h"
+#include <lwip/inet.h>
+#include <lwip/netdb.h>
+#include <lwip/sockets.h>
+#include <lwipopts.h>
 
-#include "pico_fota_bootloader.h"
+#include <pico_fota_bootloader/core.h>
 
 /**
  * Basic stringify helpers.
@@ -104,11 +104,9 @@ static void wifi_init(void) {
  * in case of an error.
  */
 static int connect_to_server(void) {
-    int sockfd;
     struct addrinfo hints, *servinfo, *p;
-    int ret_val;
     char s[46];
-    int retval;
+    int sockfd = -1;
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;
@@ -205,8 +203,8 @@ static int download_file(size_t *out_binary_size) {
     int ret_sha256 = pfb_firmware_sha256_check(*out_binary_size);
     if (ret_sha256) {
         // handle the error here
-        LOG(download, ERR,
-            "SHA256 %s", ret_sha256 < 0 ? "mbedtls error" : "mismatch");
+        LOG(download, ERR, "SHA256 %s",
+            ret_sha256 < 0 ? "mbedtls error" : "mismatch");
         return ret_sha256;
     }
     LOG(download, INF, "SHA256 matches");
